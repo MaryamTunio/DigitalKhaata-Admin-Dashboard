@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezato - E-Commerce Admin Portal</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --lezato-orange: #ff5e3a;
+            --lezato-bg: #f8f9fc;
+            --lezato-card-bg: #ffffff;
+            --lezato-text-dark: #2c3038;
+            --lezato-text-muted: #8c94a0;
+            --lezato-purple: #6c5ce7;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--lezato-bg);
+            color: var(--lezato-text-dark);
+            overflow-x: hidden;
+        }
+
+        /* SIDEBAR STYLING */
+        .sidebar {
+            height: 100vh;
+            background-color: #ffffff;
+            border-right: 1px solid #eef0f5;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1050;
+            padding: 20px 15px;
+            width: 250px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .brand-logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--lezato-text-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        .brand-logo i {
+            color: var(--lezato-orange);
+            font-size: 28px;
+        }
+
+        .sidebar .nav-link {
+            color: var(--lezato-text-muted);
+            font-weight: 500;
+            font-size: 14px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar .nav-link i {
+            font-size: 16px;
+            width: 25px;
+        }
+
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255, 94, 58, 0.08);
+            color: var(--lezato-orange);
+            font-weight: 600;
+        }
+
+        /* BOTTOM MY ACCOUNT ITEM */
+        .sidebar-bottom {
+            border-top: 1px solid #eef0f5;
+            padding-top: 15px;
+        }
+
+        /* MAIN CONTENT & TOPBAR */
+        .main-wrapper {
+            margin-left: 250px;
+            padding: 20px 30px;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        /* MOBILE RESPONSIVE SIDEBAR */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 1040;
+        }
+
+        .sidebar-toggle-btn {
+            display: none;
+            border: none;
+            background: transparent;
+            font-size: 22px;
+            color: var(--lezato-text-dark);
+            margin-right: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .main-wrapper { 
+                margin-left: 0; 
+                padding: 15px;
+            }
+
+            .sidebar { 
+                left: -260px; /* Hide off screen */
+                box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            }
+
+            .sidebar.active {
+                left: 0; /* Slide in on mobile */
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .sidebar-toggle-btn {
+                display: inline-block;
+            }
+            
+            .search-box {
+                width: 100% !important;
+            }
+        }
+
+        .top-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 320px;
+        }
+        .search-box input {
+            background-color: #ffffff;
+            border: 1px solid #eef0f5;
+            border-radius: 30px;
+            padding: 10px 20px 10px 40px;
+            font-size: 13px;
+            width: 100%;
+        }
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--lezato-text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .action-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 1px solid #eef0f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--lezato-text-dark);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .action-btn .badge-dot {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 8px;
+            height: 8px;
+            background-color: var(--lezato-orange);
+            border-radius: 50%;
+        }
+
+        .user-profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #ffffff;
+            padding: 5px 15px 5px 5px;
+            border-radius: 30px;
+            border: 1px solid #eef0f5;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* CARDS & METRICS */
+        .lezato-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #eef0f5;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.01);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .lezato-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.03);
+        }
+
+        .metric-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .btn-lezato {
+            background-color: var(--lezato-orange);
+            color: #ffffff;
+            border-radius: 20px;
+            padding: 8px 20px;
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .btn-lezato:hover {
+            background-color: #e04e2b;
+            color: #ffffff;
+        }
+
+        .editable-cell:hover {
+            background-color: #f8f9fc;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        /* ANIMATION */
+        .tab-content-item {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- MOBILE OVERLAY BACKDROP -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="container-fluid p-0">
+    <!-- SIDEBAR -->
+    <nav class="sidebar" id="sidebar">
+        <div>
+            <a href="#" class="brand-logo mb-4 px-2">
+                <i class="fa-solid fa-fire"></i> DigitalKhaata
+            </a>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" onclick="switchTab('analyticsTab', this)">
+                        <i class="fa-solid fa-border-all me-2"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchTab('productsTab', this)">
+                        <i class="fa-solid fa-box me-2"></i> Products & Inventory
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchTab('ordersTab', this)">
+                        <i class="fa-solid fa-cart-shopping me-2"></i> Orders
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- SIDEBAR BOTTOM: MY ACCOUNT -->
+        <div class="sidebar-bottom">
+            <a href="#" class="nav-link" onclick="switchTab('accountTab', this)">
+                <i class="fa-solid fa-user me-2"></i> My Account
+            </a>
+        </div>
+    </nav>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper">
+        
+        <!-- TOP NAVBAR HEADER -->
+        <div class="top-navbar">
+            <div class="d-flex align-items-center">
+                <button class="sidebar-toggle-btn" onclick="toggleSidebar()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Search here...">
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="action-btn">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="badge-dot"></span>
+                </div>
+                <div class="action-btn">
+                    <i class="fa-regular fa-comment"></i>
+                </div>
+                <!-- USER PROFILE HEAD ITEM -->
+                <div class="user-profile-btn" onclick="switchTab('accountTab', document.querySelector('.sidebar-bottom .nav-link'))">
+                    <img src="https://i.pravatar.cc/150?img=33" alt="User Profile" class="user-avatar" id="headerUserAvatar">
+                    <span class="fw-semibold fs-7 d-none d-md-inline" id="headerUserName">Alex Morgan</span>
+                    <i class="fa-solid fa-chevron-down fs-8 text-muted ms-1 d-none d-md-inline"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. ANALYTICS DASHBOARD -->
+        <div id="analyticsTab" class="tab-content-item">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold mb-0">Analytics Dashboard</h4>
+                <span class="badge bg-light text-success border p-2 rounded-pill fs-8"><i class="fa-solid fa-circle fa-2xs me-1"></i> Live Interconnected</span>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-sm-6 col-md-3">
+                    <div class="lezato-card d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted fs-7">Total Revenue</span>
+                            <h3 class="fw-bold mt-1 mb-0" id="kpiRevenue">$0.00</h3>
+                        </div>
+                        <div class="metric-icon bg-light text-primary">
+                            <i class="fa-solid fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-md-3">
+                    <div class="lezato-card d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted fs-7">Total Orders</span>
+                            <h3 class="fw-bold mt-1 mb-0" id="kpiOrders">0</h3>
+                        </div>
+                        <div class="metric-icon bg-light text-success">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-md-3">
+                    <div class="lezato-card d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted fs-7">Active Products</span>
+                            <h3 class="fw-bold mt-1 mb-0" id="kpiProducts">0</h3>
+                        </div>
+                        <div class="metric-icon bg-light text-warning">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-md-3">
+                    <div class="lezato-card d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted fs-7">Pending Shipments</span>
+                            <h3 class="fw-bold mt-1 mb-0" id="kpiPending">0</h3>
+                        </div>
+                        <div class="metric-icon bg-light text-danger">
+                            <i class="fa-solid fa-truck"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-lg-8">
+                    <div class="lezato-card">
+                        <h6 class="fw-bold mb-3">Sales Revenue Statistics</h6>
+                        <canvas id="salesChart" height="120"></canvas>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="lezato-card">
+                        <h6 class="fw-bold mb-3">Category Stock Distribution</h6>
+                        <canvas id="categoryChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. PRODUCTS TAB -->
+        <div id="productsTab" class="tab-content-item" style="display:none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold mb-0">Products & Inventory</h4>
+                <button class="btn btn-lezato" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                    <i class="fa-solid fa-plus me-1"></i> Add Product
+                </button>
+            </div>
+
+            <div class="lezato-card mb-4">
+                <div class="btn-group mb-3 flex-wrap" role="group">
+                    <button type="button" class="btn btn-outline-secondary active btn-sm" onclick="filterGallery('all', this)">All</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="filterGallery('Electronics', this)">Electronics</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="filterGallery('Accessories', this)">Accessories</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="filterGallery('Apparel', this)">Apparel</button>
+                </div>
+                <div class="row g-3" id="productGallery"></div>
+            </div>
+
+            <div class="lezato-card">
+                <h6 class="fw-bold mb-3">Inventory Quick Edit Table</h6>
+                <div class="table-responsive">
+                    <table class="table table-borderless align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>SKU</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price ($)</th>
+                                <th>Stock</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. ORDERS TAB -->
+        <div id="ordersTab" class="tab-content-item" style="display:none;">
+            <h4 class="fw-bold mb-4">Order Management</h4>
+            <div class="lezato-card">
+                <div class="table-responsive">
+                    <table class="table table-borderless align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Total ($)</th>
+                                <th>Status</th>
+                                <th>Change Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. MY ACCOUNT TAB -->
+        <div id="accountTab" class="tab-content-item" style="display:none;">
+            <h4 class="fw-bold mb-4">My Profile & Account Settings</h4>
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="lezato-card text-center">
+                        <img src="https://i.pravatar.cc/150?img=33" alt="Avatar" class="rounded-circle mb-3" width="100" height="100" id="accountAvatar">
+                        <h5 class="fw-bold mb-1" id="accountDisplayName">Alex Morgan</h5>
+                        <span class="badge bg-light text-dark mb-3">Store Administrator</span>
+                        <p class="text-muted fs-8">Supervising store logistics, live revenue metrics, and inventory operations.</p>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="lezato-card">
+                        <h6 class="fw-bold mb-3">Edit Profile Details</h6>
+                        <form id="profileForm">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fs-8 text-muted">Full Name</label>
+                                    <input type="text" id="profileNameInput" class="form-control" value="Alex Morgan">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fs-8 text-muted">Email Address</label>
+                                    <input type="email" class="form-control" value="alex.morgan@lezato.com">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fs-8 text-muted">Role</label>
+                                    <input type="text" class="form-control" value="Store Administrator" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fs-8 text-muted">Phone Number</label>
+                                    <input type="text" class="form-control" value="+1 (555) 019-2834">
+                                </div>
+                            </div>
+                            <hr class="my-4">
+                            <button type="button" class="btn btn-lezato" onclick="saveProfile()">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal: Add Product -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 style-card" style="border-radius: 16px;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Add New Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProductForm">
+                    <div class="mb-3">
+                        <label class="form-label fs-8 text-muted">Product Name</label>
+                        <input type="text" id="newProdName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fs-8 text-muted">Category</label>
+                        <select id="newProdCategory" class="form-select">
+                            <option value="Electronics">Electronics</option>
+                            <option value="Accessories">Accessories</option>
+                            <option value="Apparel">Apparel</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fs-8 text-muted">Price ($)</label>
+                        <input type="number" id="newProdPrice" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fs-8 text-muted">Initial Stock</label>
+                        <input type="number" id="newProdStock" class="form-control" required>
+                    </div>
+                    <button type="button" class="btn btn-lezato w-100" onclick="addProduct()">Add to Inventory</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // MOBILE SIDEBAR TOGGLE
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    }
+
+    // DATA STORE
+    let products = [
+        { sku: 'PROD-101', name: 'Wireless Headphones', category: 'Electronics', price: 99, stock: 45 },
+        { sku: 'PROD-102', name: 'Ergonomic Desk Chair', category: 'Accessories', price: 180, stock: 12 },
+        { sku: 'PROD-103', name: 'Smartwatch V2', category: 'Electronics', price: 150, stock: 28 },
+        { sku: 'PROD-104', name: 'Cotton Hoodie', category: 'Apparel', price: 45, stock: 60 }
+    ];
+
+    let orders = [
+        { id: '#ORD-8921', customer: 'John Doe', date: '2026-07-20', total: 249.99, status: 'Pending' },
+        { id: '#ORD-8922', customer: 'Sarah Smith', date: '2026-07-21', total: 89.50, status: 'Processing' },
+        { id: '#ORD-8923', customer: 'Michael Brown', date: '2026-07-22', total: 1200.00, status: 'Delivered' }
+    ];
+
+    let salesChartInstance = null;
+    let categoryChartInstance = null;
+
+    // TAB SWITCHING
+    function switchTab(tabId, el) {
+        document.querySelectorAll('.tab-content-item').forEach(tab => tab.style.display = 'none');
+        document.getElementById(tabId).style.display = 'block';
+        
+        document.querySelectorAll('.sidebar .nav-link').forEach(link => link.classList.remove('active'));
+        if(el) el.classList.add('active');
+
+        // Close sidebar on mobile after clicking
+        if (window.innerWidth <= 768) {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+    }
+
+    // PROFILE SAVE LOGIC
+    function saveProfile() {
+        const newName = document.getElementById('profileNameInput').value;
+        if(newName) {
+            document.getElementById('headerUserName').textContent = newName;
+            document.getElementById('accountDisplayName').textContent = newName;
+            alert('Profile information updated successfully!');
+        }
+    }
+
+    // ANALYTICS SYNC
+    function updateAnalytics() {
+        const totalRevenue = orders.reduce((sum, o) => sum + (o.status === 'Delivered' ? o.total : 0), 0);
+        const pendingCount = orders.filter(o => o.status !== 'Delivered').length;
+        
+        document.getElementById('kpiRevenue').textContent = '$' + totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2});
+        document.getElementById('kpiOrders').textContent = orders.length;
+        document.getElementById('kpiProducts').textContent = products.length;
+        document.getElementById('kpiPending').textContent = pendingCount;
+
+        if (salesChartInstance) {
+            salesChartInstance.data.datasets[0].data = [12000, 19000, 15000, 22000, 28000, 24000, totalRevenue];
+            salesChartInstance.update();
+        }
+
+        if (categoryChartInstance) {
+            const categories = ['Electronics', 'Accessories', 'Apparel'];
+            const counts = categories.map(cat => products.filter(p => p.category === cat).reduce((sum, p) => sum + p.stock, 0));
+            categoryChartInstance.data.datasets[0].data = counts;
+            categoryChartInstance.update();
+        }
+    }
+
+    // RENDER ORDERS
+    function renderOrders() {
+        const tbody = document.getElementById('orderTableBody');
+        tbody.innerHTML = '';
+
+        orders.forEach((o, idx) => {
+            let badgeClass = 'bg-warning text-dark';
+            if (o.status === 'Processing') badgeClass = 'bg-info text-dark';
+            else if (o.status === 'Shipped') badgeClass = 'bg-primary text-white';
+            else if (o.status === 'Delivered') badgeClass = 'bg-success text-white';
+
+            tbody.innerHTML += `
+                <tr>
+                    <td class="fw-bold">${o.id}</td>
+                    <td>${o.customer}</td>
+                    <td class="text-muted fs-8">${o.date}</td>
+                    <td><strong>$${o.total.toFixed(2)}</strong></td>
+                    <td><span class="badge ${badgeClass} rounded-pill">${o.status}</span></td>
+                    <td>
+                        <select class="form-select form-select-sm border-0 bg-light" onchange="updateOrderStatus(${idx}, this.value)">
+                            <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="Processing" ${o.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                            <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                            <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                        </select>
+                    </td>
+                </tr>`;
+        });
+    }
+
+    function updateOrderStatus(idx, newStatus) {
+        orders[idx].status = newStatus;
+        renderOrders();
+        updateAnalytics();
+    }
+
+    // RENDER PRODUCTS
+    function renderProducts() {
+        const gallery = document.getElementById('productGallery');
+        const tableBody = document.getElementById('inventoryTableBody');
+        gallery.innerHTML = '';
+        tableBody.innerHTML = '';
+
+        products.forEach((p, idx) => {
+            gallery.innerHTML += `
+                <div class="col-6 col-md-3 prod-card-item" data-category="${p.category}">
+                    <div class="lezato-card text-center p-3">
+                        <div class="bg-light rounded-circle mx-auto p-3 mb-2" style="width: 60px; height: 60px;"><i class="fa-solid fa-box fa-xl text-secondary"></i></div>
+                        <h6 class="fw-bold mb-1 fs-7">${p.name}</h6>
+                        <span class="badge bg-light text-muted mb-2 fs-8">${p.category}</span>
+                        <div class="fw-bold text-danger">$${p.price}</div>
+                        <small class="text-muted fs-8">Stock: ${p.stock}</small>
+                    </div>
+                </div>`;
+
+            tableBody.innerHTML += `
+                <tr>
+                    <td class="fw-bold">${p.sku}</td>
+                    <td>${p.name}</td>
+                    <td><span class="badge bg-light text-dark">${p.category}</span></td>
+                    <td class="editable-cell" onclick="editInline(${idx}, 'price')">$${p.price}</td>
+                    <td class="editable-cell" onclick="editInline(${idx}, 'stock')">${p.stock}</td>
+                    <td><button class="btn btn-sm btn-link text-danger" onclick="deleteProduct(${idx})"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>`;
+        });
+        
+        updateAnalytics();
+    }
+
+    function filterGallery(category, btn) {
+        document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.prod-card-item').forEach(card => {
+            if(category === 'all' || card.dataset.category === category) card.style.display = 'block';
+            else card.style.display = 'none';
+        });
+    }
+
+    function addProduct() {
+        const name = document.getElementById('newProdName').value;
+        const category = document.getElementById('newProdCategory').value;
+        const price = document.getElementById('newProdPrice').value;
+        const stock = document.getElementById('newProdStock').value;
+
+        if(name && price && stock) {
+            products.push({
+                sku: 'PROD-' + (101 + products.length),
+                name: name, 
+                category: category, 
+                price: parseFloat(price), 
+                stock: parseInt(stock)
+            });
+            renderProducts();
+            
+            const modalEl = document.getElementById('addProductModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modalInstance.hide();
+            
+            document.getElementById('addProductForm').reset();
+        }
+    }
+
+    function deleteProduct(idx) {
+        products.splice(idx, 1);
+        renderProducts();
+    }
+
+    function editInline(idx, field) {
+        const currentVal = products[idx][field];
+        const newVal = prompt(`Edit ${field}:`, currentVal);
+        if(newVal !== null && newVal.trim() !== '') {
+            products[idx][field] = field === 'price' ? parseFloat(newVal) : parseInt(newVal);
+            renderProducts();
+        }
+    }
+
+    // INITIALIZATION
+    window.onload = function() {
+        const salesCtx = document.getElementById('salesChart').getContext('2d');
+        salesChartInstance = new Chart(salesCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Current'],
+                datasets: [{
+                    label: 'Revenue ($)',
+                    data: [12000, 19000, 15000, 22000, 28000, 24000, 0],
+                    borderColor: '#ff5e3a',
+                    backgroundColor: 'rgba(255, 94, 58, 0.1)',
+                    fill: true, 
+                    tension: 0.4
+                }]
+            }
+        });
+
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        categoryChartInstance = new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Electronics', 'Accessories', 'Apparel'],
+                datasets: [{
+                    data: [0, 0, 0],
+                    backgroundColor: ['#ff5e3a', '#6c5ce7', '#2ec4b6']
+                }]
+            }
+        });
+
+        renderOrders();
+        renderProducts();
+    };
+</script>
+</body>
+</html>
